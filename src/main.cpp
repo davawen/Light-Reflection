@@ -15,7 +15,7 @@ int main()
 	{
 		sf::Vector2f m_pos;
 		float m_offset;
-		Light m_lights[10];
+		Light m_lights[12];
 		
 		Lamp(float x, float y)
 		{
@@ -24,17 +24,16 @@ int main()
 			
 			m_offset = 0.f;
 			
-			for(int i = 0; i < 10; i++)
+			for(int i = 0; i < 12; i++)
 			{
-				m_lights[i] = Light(x, y, i / 10.f * M_PI * 2.f);
+				m_lights[i] = Light(x, y, i / 12.f * M_PI * 2.f);
 			}
 		}
 		
-		void update(std::vector<Line> &lines)
+		void update()
 		{
 			for(auto &light : m_lights)
 			{
-				light.calculateBounce(lines);
 				light.m_start = m_pos;
 				light.m_angle += m_offset;
 			}
@@ -47,16 +46,25 @@ int main()
 	std::vector<Line> lines =
 	{
 		Line(50.f, 50.f, 750.f, 150.f),
-		Line(650.f, 400.f, 600.f, 800.f)
+		Line(650.f, 400.f, 600.f, 800.f),
+		Line(500.f, 500.f, 550.f, 550.f)
 	};
+	
+	std::vector<Arc> arcs = 
+	{
+		Arc(400.f, 400.f, M_PI * 2.f, 0.f, 100.f, 100.f)
+	};
+	
+	for(auto &arc : arcs) { arc.calculateVertices(); }
 	
 	sf::Clock deltaClock;
 	
 	float deltaTime;
 	
-	lamp.update(lines);
+	lamp.update();
 	
 	bool isUpdatingLamp = false;
+	
 	
 	while(window.isOpen())
 	{
@@ -78,6 +86,8 @@ int main()
 						case sf::Mouse::Left:
 							isUpdatingLamp = true;
 							break;
+						default:
+							break;
 					}
 					break;
 				case sf::Event::MouseButtonReleased:
@@ -86,7 +96,7 @@ int main()
 				case sf::Event::MouseWheelScrolled:
 					lamp.m_offset = event.mouseWheelScroll.delta * 0.01f;
 					
-					lamp.update(lines);
+					lamp.update();
 					break;
 				default:
 					break;
@@ -98,18 +108,17 @@ int main()
 		if(isUpdatingLamp)
 		{
 			lamp.m_pos = sf::Vector2f(mousePosition);
-			lamp.update(lines);
+			lamp.update();
 		}
 		
 		for(auto &light : lamp.m_lights)
 		{
+			light.calculateBounce(lines, arcs);
 			light.draw(window);
 		}
 		
-		for(auto &line : lines)
-		{
-			line.draw(window);
-		}
+		for(auto &line : lines)          { line.draw(window); }
+		for(auto &arc : arcs)            { arc.draw(window); }
 		
 		window.display();
 

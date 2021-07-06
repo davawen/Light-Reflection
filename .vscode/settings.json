@@ -1,6 +1,7 @@
 {
 	"files.associations": {
 		"cstdlib": "cpp",
-		"*.tcc": "cpp"
+		"*.tcc": "cpp",
+		"random": "cpp"
 	}
 }

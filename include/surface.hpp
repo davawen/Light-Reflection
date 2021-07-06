@@ -5,6 +5,8 @@
 
 #include <SFML/Graphics.hpp>
 
+#include "vector_math.hpp"
+
 class Line
 {
 	private:
@@ -19,6 +21,28 @@ class Line
 		
 		bool intersects(float ox1, float oy1, float ox2, float oy2, float *i_x, float *i_y);
 		
+		void draw(sf::RenderWindow &window);
+};
+
+class Arc
+{
+	private:
+		sf::VertexArray m_shape;
+	
+	public:
+		sf::Vector2f m_center;
+		/** Number from 0 to 2PI determining the "amount of circle" in the arc */
+		float m_length;
+		float m_angleOffset;
+		
+		float m_semiMajor;
+		float m_semiMinor;
+		
+		Arc(float cx, float cy, float length, float angleOffset, float semiMajor, float semiMinor);
+		
+		bool intersects(float x1, float y1, float x2, float y2, float *i_x1, float *i_y1, float *i_x2, float *i_y2);
+		
+		void calculateVertices();
 		void draw(sf::RenderWindow &window);
 };
 
