@@ -45,15 +45,14 @@ void Line::draw(sf::RenderWindow &window)
 }
 
 
-Arc::Arc(float cx, float cy, float length, float angleOffset, float semiMajor, float semiMinor)
+Arc::Arc(float cx, float cy, float length, float angleOffset, float radius)
 {
 	this->m_center = sf::Vector2f(cx, cy);
 	
 	this->m_length = length;
 	this->m_angleOffset = angleOffset;
 	
-	this->m_semiMajor = semiMajor;
-	this->m_semiMinor = semiMinor;
+	this->m_radius = radius;
 	
 	this->m_shape = sf::VertexArray(sf::PrimitiveType::LineStrip, 30);
 	
@@ -66,7 +65,7 @@ bool Arc::intersects(float x1, float y1, float x2, float y2, float *i_x1, float 
 	
 	// float &a = m_semiMajor;
 	// float &b = m_semiMinor;
-	float &r = m_semiMajor;
+	float &r = m_radius;
 	float &cx = m_center.x;
 	float &cy = m_center.y;
 	
@@ -79,8 +78,23 @@ bool Arc::intersects(float x1, float y1, float x2, float y2, float *i_x1, float 
 		return false;
 	}
 	
+	// Then check if the ray actually will collide with the arc
+	
+	sf::Vector2f centerToPoint1 = sf::Vector2f(x1 - cx, y1 - cy);
+	// sf::Vector2f centerToPoint2 = sf::Vector2f(x2 - cx, y2 - cy);
+
+	// sf::Vector2f centerToArcStart = m_arcStart - m_center;
+	// sf::Vector2f centerToArcEnd = m_arcEnd - m_center;
+	
+	// bool point1InArc = crossProduct(centerToArcEnd, centerToPoint1) * crossProduct(centerToArcStart, centerToPoint1) < 0;
+	// bool point2InArc = crossProduct(centerToArcEnd, centerToPoint2) * crossProduct(centerToArcStart, centerToPoint2) < 0;
+	
+	// // If both aren't in between the arc, return false
+	// if(!point1InArc && !point2InArc) return false;
+	
+	
 	sf::Vector2f d = sf::Vector2f(x2 - x1, y2 - y1);
-	sf::Vector2f f = sf::Vector2f(x1 - cx, y1 - cy);
+	sf::Vector2f &f = centerToPoint1;
 	
 	float a = dotProduct(d, d);
 	float b = 2.f * dotProduct(f, d);
@@ -153,8 +167,11 @@ void Arc::calculateVertices()
 	{
 		float angle = static_cast<float>(i) / (numVertices-1) * m_length + m_angleOffset;
 		
-		m_shape[i].position = sf::Vector2f(m_center.x + cosf(angle)*m_semiMajor, m_center.y + sinf(angle)*m_semiMinor);
+		m_shape[i].position = sf::Vector2f(m_center.x + cosf(angle) * m_radius, m_center.y + sinf(angle) * m_radius);
 	}
+	
+	m_arcStart = m_shape[0].position;
+	m_arcEnd = m_shape[numVertices-1].position;
 }
 
 void Arc::draw(sf::RenderWindow &window)

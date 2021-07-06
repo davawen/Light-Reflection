@@ -29,16 +29,19 @@ class Arc
 	private:
 		sf::VertexArray m_shape;
 	
+		sf::Vector2f m_arcStart;
+		sf::Vector2f m_arcEnd;
+	
 	public:
+	
 		sf::Vector2f m_center;
 		/** Number from 0 to 2PI determining the "amount of circle" in the arc */
 		float m_length;
 		float m_angleOffset;
 		
-		float m_semiMajor;
-		float m_semiMinor;
+		float m_radius;
 		
-		Arc(float cx, float cy, float length, float angleOffset, float semiMajor, float semiMinor);
+		Arc(float cx, float cy, float length, float angleOffset, float radius);
 		
 		bool intersects(float x1, float y1, float x2, float y2, float *i_x1, float *i_y1, float *i_x2, float *i_y2);
 		

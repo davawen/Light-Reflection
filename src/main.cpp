@@ -45,14 +45,14 @@ int main()
 	
 	std::vector<Line> lines =
 	{
-		Line(50.f, 50.f, 750.f, 150.f),
-		Line(650.f, 400.f, 600.f, 800.f),
-		Line(500.f, 500.f, 550.f, 550.f)
+		// Line(50.f, 50.f, 750.f, 150.f),
+		// Line(650.f, 400.f, 600.f, 800.f),
+		// Line(500.f, 500.f, 550.f, 550.f)
 	};
 	
 	std::vector<Arc> arcs = 
 	{
-		Arc(400.f, 400.f, M_PI, -M_PI * .5f, 100.f, 100.f)
+		Arc(400.f, 400.f, M_PI, -M_PI * .5f, 300.f)
 	};
 	
 	for(auto &arc : arcs) { arc.calculateVertices(); }
@@ -121,7 +121,9 @@ int main()
 		for(auto &arc : arcs)            { arc.draw(window); }
 		
 		window.display();
-
+		
+		printf("\x1b[1000D%f FPS", 1.f / deltaTime);
+		
 		std::cout.flush();
 	}
 
