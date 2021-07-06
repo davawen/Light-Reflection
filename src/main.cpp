@@ -52,7 +52,7 @@ int main()
 	
 	std::vector<Arc> arcs = 
 	{
-		Arc(400.f, 400.f, M_PI * 2.f, 0.f, 100.f, 100.f)
+		Arc(400.f, 400.f, M_PI, -M_PI * .5f, 100.f, 100.f)
 	};
 	
 	for(auto &arc : arcs) { arc.calculateVertices(); }

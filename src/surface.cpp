@@ -79,122 +79,66 @@ bool Arc::intersects(float x1, float y1, float x2, float y2, float *i_x1, float 
 		return false;
 	}
 	
-	float A = y2 - y1;
-	float B = x1 - x2;
-	float C = x2 * y1 - x1 * y2;
-	float a = A*A + B*B;
-	float b, c;
+	sf::Vector2f d = sf::Vector2f(x2 - x1, y2 - y1);
+	sf::Vector2f f = sf::Vector2f(x1 - cx, y1 - cy);
 	
-	bool bnz = true;
-	if(abs(B) > 0) 
-	{
-		b = 2.f * ( A * C + A * B * cy - B*B * cx );
-		c = C*C + 2.f * B * C * cy - B*B * ( r*r - cx*cx - cy*cy );
-	}
+	float a = dotProduct(d, d);
+	float b = 2.f * dotProduct(f, d);
+	float c = dotProduct(f, f) - r * r;
+	
+	float discriminant = b * b - 4.f * a * c;
+	
+	if(discriminant < 0.f) return false;
 	else
 	{
-		b = 2.f * ( B * C + A * B * cx - A*A * cy );
-		c = C*C + 2.f * A * C * cx - A*A * ( r*r - cx*cx - cy*cy );
-		bnz = false;
-	}
-	
-	float d = b*b - 4.f * a * c; // discriminant
-	if(d < 0.f)
-	{
+		// ray didn't totally miss sphere,
+		// so there is a solution to
+		// the equation.
+
+		discriminant = sqrt(discriminant);
+
+		// either solution may be on or off the ray so need to test both
+		// t1 is always the smaller value, because BOTH discriminant and
+		// a are nonnegative.
+		float t1 = ( -b - discriminant ) / ( 2 * a );
+		float t2 = ( -b + discriminant ) / ( 2 * a );
+
+		// 3x HIT cases:
+		//          -o->             --|-->  |            |  --|->
+		// Impale(t1 hit,t2 hit), Poke(t1 hit,t2>1), ExitWound(t1<0, t2 hit), 
+
+		// 3x MISS cases:
+		//       ->  o                     o ->              | -> |
+		// FallShort (t1>1,t2>1), Past (t1<0,t2<0), CompletelyInside(t1<0, t2>1)
+
+		if(t1 >= 0 && t1 <= 1)
+		{
+			// t1 is the intersection, and it's closer than t2
+			// (since t1 uses -b - discriminant)
+			// Impale, Poke
+			
+			*i_x1 = x1 + t1 * d.x;
+			*i_y1 = y1 + t1 * d.y;
+			
+			return true;
+		}
+
+		// here t1 didn't intersect so we are either started
+		// inside the sphere or completely past it
+		if(t2 >= 0 && t2 <= 1)
+		{
+			*i_x1 = x1 + t2 * d.x;
+			*i_y1 = y1 + t2 * d.y;
+			
+			// ExitWound
+			return true;
+		}
+
+		// no intn: FallShort, Past, CompletelyInside
 		return false;
 	}
-
-	// checks whether a point is within a segment
-	auto within = [x1, y1, x2, y2](float x, float y)
-	{
-		auto d1 = sqrtf(distanceSq(x1, y1, x2, y2));  // distance between end-points
-		auto d2 = sqrtf(distanceSq(x1, y1, x, y));    // distance from point to one end
-		auto d3 = sqrtf(distanceSq(x2, y2, x, y));    // distance from point to other end
-		auto delta = d1 - d2 - d3;
-		
-		return abs(delta) < 1e-14;                    // true if delta is less than a small tolerance
-	};
-
-	auto fx = [A, B, C](float x)
-	{
-		return -( A * x + C ) / B;
-	};
-
-	auto fy = [A, B, C](float y)
-	{
-		return -( B * y + C ) / A;
-	};
-
-	float x, y;
-	if(d == 0.f)
-	{
-		// line is tangent to circle, so just one intersect at most
-		if(bnz)
-		{
-			x = -b / ( 2 * a );
-			y = fx(x);
-		}
-		else
-		{
-			y = -b / ( 2 * a );
-			x = fy(y);
-		}
-
-		if(within(x, y))
-		{
-			*i_x1 = x;
-			*i_y1 = y;
-			*i_x2 = x;
-			*i_y2 = y;
-		}
-	}
-	else 
-	{
-		// two intersects at most
-		d = sqrtf(d);
-		if(bnz)
-		{
-			x = ( -b + d ) / ( 2 * a );
-			y = fx(x);
-			
-			if(within(x, y))
-			{
-				*i_x1 = x;
-				*i_y1 = y;
-			}
-			
-			x = ( -b - d ) / ( 2 * a );
-			y = fx(x);
-
-			if(within(x, y))
-			{
-				*i_x2 = x;
-				*i_y2 = y;
-			}
-		}
-		else
-		{
-			y = ( -b + d ) / ( 2 * a );
-			x = fy(y);
-			
-			if(within(x, y))
-			{
-				*i_x1 = x;
-				*i_y1 = y;
-			}
-			
-			y = ( -b - d ) / ( 2 * a );
-			x = fy(y);
-
-			if(within(x, y))
-			{
-				*i_x2 = x;
-				*i_y2 = y;
-			}
-		}
-	}
-
-	return true;
+	
+	return false;
 }
 
 void Arc::calculateVertices()

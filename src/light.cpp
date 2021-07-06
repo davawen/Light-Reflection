@@ -51,7 +51,7 @@ void Light::calculateBounce(std::vector<Line> lines, std::vector<Arc> arcs)
 	
 	while(reflections > 0)
 	{
-		distance += 50.f;
+		distance += 10.f;
 		
 		diff = sf::Vector2f(cosAngle * distance, sinAngle * distance);
 		endRay = startRay + diff;
@@ -89,40 +89,41 @@ void Light::calculateBounce(std::vector<Line> lines, std::vector<Arc> arcs)
 			break;
 		}
 		// Don't check arcs if we already reflected on a line
-		// else if(distance > 0.f)
-		// {
-		// 	for(auto &arc : arcs)
-		// 	{
-		// 		if(arc.intersects(startRay.x, startRay.y, endRay.x, endRay.y, &i_x1, &i_y1, &i_x2, &i_y2))
-		// 		{
-		// 			// Find closer intersection point
-		// 			bool isIntersection1Closer = distanceSq(startRay.x, startRay.y, i_x1, i_y1) < distanceSq(startRay.x, startRay.y, i_x2, i_y2);
+		else if(distance > 0.f)
+		{
+			for(auto &arc : arcs)
+			{
+				if(arc.intersects(startRay.x, startRay.y, endRay.x, endRay.y, &i_x1, &i_y1, &i_x2, &i_y2))
+				{
+					// Find closer intersection point
+					// bool isIntersection1Closer = distanceSq(startRay.x, startRay.y, i_x1, i_y1) < distanceSq(startRay.x, startRay.y, i_x2, i_y2);
 					
-		// 			float closerX = isIntersection1Closer ? i_x1 : i_x2;
-		// 			float closerY = isIntersection1Closer ? i_y1 : i_y2;
+					// float closerX = isIntersection1Closer ? i_x1 : i_x2;
+					// float closerY = isIntersection1Closer ? i_y1 : i_y2;
 					
-		// 			shape.push_back(sf::Vertex(sf::Vector2f(closerX, closerY), sf::Color(0xFFFF00FF)));
+					// shape.push_back(sf::Vertex(sf::Vector2f(closerX, closerY), sf::Color(0xFFFF00FF)));
+					shape.push_back(sf::Vertex(sf::Vector2f(i_x1, i_y1), sf::Color(0xFFFF00FF)));
 					
-		// 			/* 
-		// 			// The normal is a vector from the center to the intersection point
-		// 			this->reflect(sf::Vector2f( closerX - arc.m_center.x, closerY - arc.m_center.y ), diff, distance, cosAngle, sinAngle);
+					
+					// The normal is a vector from the center to the intersection point
+					this->reflect(sf::Vector2f( i_x1 - arc.m_center.x, i_y1 - arc.m_center.y ), diff, distance, cosAngle, sinAngle);
 
-		// 			//Avance ray a bit to avoid infinite collision
-		// 			startRay.x = i_x1 + cosAngle;
-		// 			startRay.y = i_y1 + sinAngle;
+					//Avance ray a bit to avoid infinite collision
+					startRay.x = i_x1 + cosAngle;
+					startRay.y = i_y1 + sinAngle;
 
-		// 			totalDistance += distance;
-
-		// 			distance = 0.;
-
-		// 			reflections--; */
+					totalDistance += distance;
 					
-		// 			// break;
+					distance = 0.;
+
+					reflections--;
 					
-		// 			goto endLoop;
-		// 		}
-		// 	}
-		// }
+					break;
+					
+					// goto endLoop;
+				}
+			}
+		}
 		
 	}
 	
