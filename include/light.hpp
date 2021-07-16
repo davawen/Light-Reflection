@@ -14,7 +14,7 @@
 class Light
 {
 	private:
-		sf::VertexArray m_shape;
+		std::vector<sf::Vertex> m_shape;
 		
 		void reflect(const sf::Vector2f &normal, sf::Vector2f &diff, float &distance, float &cosAngle, float &sinAngle);
 		
