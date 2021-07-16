@@ -42,6 +42,9 @@ class Arc
 		float m_radius;
 		
 		Arc(float cx, float cy, float length, float angleOffset, float radius);
+
+		/** Checks if a point is in the arc section or not */
+		bool pointInSection(const float &x, const float &y);
 		
 		bool intersects(float x1, float y1, float x2, float y2, float *i_x1, float *i_y1, float *i_x2, float *i_y2);
 		

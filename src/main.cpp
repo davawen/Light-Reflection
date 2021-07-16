@@ -14,15 +14,16 @@ int main()
 	struct Lamp
 	{
 		sf::Vector2f m_pos;
-		float m_offset;
+		float m_speed;
 		Light m_lights[12];
+		
 		
 		Lamp(float x, float y)
 		{
 			m_pos.x = x;
 			m_pos.y = y;
 			
-			m_offset = 0.f;
+			m_speed = 0.5f;
 			
 			for(int i = 0; i < 12; i++)
 			{
@@ -30,18 +31,16 @@ int main()
 			}
 		}
 		
-		void update()
+		void update(float deltaTime)
 		{
 			for(auto &light : m_lights)
 			{
 				light.m_start = m_pos;
-				light.m_angle += m_offset;
+				light.m_angle += m_speed*deltaTime;
 			}
-			
-			m_offset = 0.f;
 		}
 		
-	} lamp{200.f, 200.f};
+	} lamp{500.f, 400.f};
 	
 	std::vector<Line> lines =
 	{
@@ -59,9 +58,9 @@ int main()
 	
 	sf::Clock deltaClock;
 	
-	float deltaTime;
+	float deltaTime = 0.f;
 	
-	lamp.update();
+	lamp.update(deltaTime);
 	
 	bool isUpdatingLamp = false;
 	
@@ -94,9 +93,9 @@ int main()
 					isUpdatingLamp = false;
 					break;
 				case sf::Event::MouseWheelScrolled:
-					lamp.m_offset = event.mouseWheelScroll.delta * 0.01f;
+					lamp.m_speed += event.mouseWheelScroll.delta * 0.01f;
 					
-					lamp.update();
+					lamp.update(deltaTime);
 					break;
 				default:
 					break;
@@ -104,12 +103,18 @@ int main()
 		}
 
 		window.clear();
+
+
+		for(auto &line : lines)          { line.draw(window); }
+		for(auto &arc : arcs)            { arc.draw(window); }
+		
 		
 		if(isUpdatingLamp)
 		{
 			lamp.m_pos = sf::Vector2f(mousePosition);
-			lamp.update();
 		}
+		
+		lamp.update(deltaTime);
 		
 		for(auto &light : lamp.m_lights)
 		{
@@ -117,12 +122,9 @@ int main()
 			light.draw(window);
 		}
 		
-		for(auto &line : lines)          { line.draw(window); }
-		for(auto &arc : arcs)            { arc.draw(window); }
-		
 		window.display();
 		
-		printf("\x1b[1000D%f FPS", 1.f / deltaTime);
+		printf("\x1b[1000D%f FPS\n\x1b[1A", 1.f / deltaTime);
 		
 		std::cout.flush();
 	}

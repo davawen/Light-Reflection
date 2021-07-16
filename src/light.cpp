@@ -61,7 +61,7 @@ void Light::calculateBounce(std::vector<Line> lines, std::vector<Arc> arcs)
 			// Reflect ray on line
 			if(line.intersects(startRay.x, startRay.y, endRay.x, endRay.y, &i_x1, &i_y1))
 			{
-				shape.push_back(sf::Vertex(sf::Vector2f(i_x1, i_y1), sf::Color(0xFFFF00FF)));
+				shape.push_back(sf::Vertex(sf::Vector2f(i_x1, i_y1), sf::Color(0xFFFF007F)));
 				
 				this->reflect(line.m_normal, diff, distance, cosAngle, sinAngle);
 				
@@ -85,7 +85,7 @@ void Light::calculateBounce(std::vector<Line> lines, std::vector<Arc> arcs)
 		{
 			totalDistance += 1000.f;
 
-			shape.push_back(sf::Vertex(endRay, sf::Color(0xFFFF00FF)));
+			shape.push_back(sf::Vertex(endRay, sf::Color(0xFFFF007F)));
 			break;
 		}
 		// Don't check arcs if we already reflected on a line
@@ -102,8 +102,7 @@ void Light::calculateBounce(std::vector<Line> lines, std::vector<Arc> arcs)
 					// float closerY = isIntersection1Closer ? i_y1 : i_y2;
 					
 					// shape.push_back(sf::Vertex(sf::Vector2f(closerX, closerY), sf::Color(0xFFFF00FF)));
-					shape.push_back(sf::Vertex(sf::Vector2f(i_x1, i_y1), sf::Color(0xFFFF00FF)));
-					
+					shape.push_back(sf::Vertex(sf::Vector2f(i_x1, i_y1), sf::Color(0xFFFF007F)));
 					
 					// The normal is a vector from the center to the intersection point
 					this->reflect(sf::Vector2f( i_x1 - arc.m_center.x, i_y1 - arc.m_center.y ), diff, distance, cosAngle, sinAngle);
@@ -126,8 +125,6 @@ void Light::calculateBounce(std::vector<Line> lines, std::vector<Arc> arcs)
 		}
 		
 	}
-	
-endLoop:
 
 	int numberVertices = shape.size();
 	m_shape = sf::VertexArray(sf::PrimitiveType::LineStrip, numberVertices);

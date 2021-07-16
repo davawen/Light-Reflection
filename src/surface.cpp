@@ -59,6 +59,24 @@ Arc::Arc(float cx, float cy, float length, float angleOffset, float radius)
 	this->calculateVertices();
 }
 
+bool Arc::pointInSection(const float &x, const float &y)
+{
+	//if (AxB * AxC >= 0 && CxB * CxA >= 0)
+
+	// then B is definitely inside A and C
+	
+	// A-> m_arcStart
+	// B-> (x, y)
+	// C-> m_arcEnd
+	
+	sf::Vector2f centerToStart = m_arcStart - m_center;
+	sf::Vector2f centerToEnd = m_arcEnd - m_center;
+	sf::Vector2f centerToPoint = sf::Vector2f(x - m_center.x, y - m_center.y);
+	
+	return crossProduct(centerToStart, centerToPoint) * crossProduct(centerToStart, m_arcEnd) >= 0 &&
+		crossProduct(centerToEnd, centerToPoint) * crossProduct(centerToEnd, centerToStart) >= 0;
+}
+
 bool Arc::intersects(float x1, float y1, float x2, float y2, float *i_x1, float *i_y1, float *i_x2, float *i_y2)
 {
 	// Please help me
@@ -81,16 +99,6 @@ bool Arc::intersects(float x1, float y1, float x2, float y2, float *i_x1, float 
 	// Then check if the ray actually will collide with the arc
 	
 	sf::Vector2f centerToPoint1 = sf::Vector2f(x1 - cx, y1 - cy);
-	// sf::Vector2f centerToPoint2 = sf::Vector2f(x2 - cx, y2 - cy);
-
-	// sf::Vector2f centerToArcStart = m_arcStart - m_center;
-	// sf::Vector2f centerToArcEnd = m_arcEnd - m_center;
-	
-	// bool point1InArc = crossProduct(centerToArcEnd, centerToPoint1) * crossProduct(centerToArcStart, centerToPoint1) < 0;
-	// bool point2InArc = crossProduct(centerToArcEnd, centerToPoint2) * crossProduct(centerToArcStart, centerToPoint2) < 0;
-	
-	// // If both aren't in between the arc, return false
-	// if(!point1InArc && !point2InArc) return false;
 	
 	
 	sf::Vector2f d = sf::Vector2f(x2 - x1, y2 - y1);
@@ -124,8 +132,11 @@ bool Arc::intersects(float x1, float y1, float x2, float y2, float *i_x1, float 
 		// 3x MISS cases:
 		//       ->  o                     o ->              | -> |
 		// FallShort (t1>1,t2>1), Past (t1<0,t2<0), CompletelyInside(t1<0, t2>1)
-
-		if(t1 >= 0 && t1 <= 1)
+		
+		bool t1Hit = t1 >= 0 && t1 <= 1;
+		bool t2Hit = t2 >= 0 && t2 <= 1;
+		
+		if(t1Hit)
 		{
 			// t1 is the intersection, and it's closer than t2
 			// (since t1 uses -b - discriminant)
@@ -134,7 +145,21 @@ bool Arc::intersects(float x1, float y1, float x2, float y2, float *i_x1, float 
 			*i_x1 = x1 + t1 * d.x;
 			*i_y1 = y1 + t1 * d.y;
 			
-			return true;
+			if(t2Hit)
+			{
+				// Impale
+				if(!pointInSection(*i_x1, *i_y1))
+				{
+					*i_x1 = x1 + t2 * d.x;
+					*i_y1 = y1 + t2 * d.y;
+					
+					return pointInSection(*i_x1, *i_y1);
+				}
+				
+				return true;
+			}
+			
+			return pointInSection(*i_x1, *i_y1);
 		}
 
 		// here t1 didn't intersect so we are either started
@@ -145,9 +170,9 @@ bool Arc::intersects(float x1, float y1, float x2, float y2, float *i_x1, float 
 			*i_y1 = y1 + t2 * d.y;
 			
 			// ExitWound
-			return true;
+			return pointInSection(*i_x1, *i_y1);
 		}
-
+		
 		// no intn: FallShort, Past, CompletelyInside
 		return false;
 	}
