@@ -23,11 +23,11 @@ int main()
 			m_pos.x = x;
 			m_pos.y = y;
 			
-			m_speed = 0.5f;
+			m_speed = 0.f;
 			
 			for(int i = 0; i < 12; i++)
 			{
-				m_lights[i] = Light(x, y, i / 12.f * M_PI * 2.f);
+				m_lights[i] = Light(x, y, i / 22.f * M_PI * 2.f - M_PI/2);
 			}
 		}
 		
@@ -124,7 +124,8 @@ int main()
 		
 		window.display();
 		
-		printf("\x1b[1000D%f FPS\n\x1b[1A", 1.f / deltaTime);
+		// Clear entire line -> Move cursor to beginning of line -> Write FPS -> Add newline, then move back up
+		printf("\x1b[2K\x1b[1000D%f FPS\n\x1b[1A", 1.f / deltaTime);
 		
 		std::cout.flush();
 	}
