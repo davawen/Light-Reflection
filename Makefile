@@ -35,6 +35,9 @@ build/obj/%.o: src/%.cpp
 clean:
 	rm -rf build/bin/$(EXEC_NAME) build/obj/*.o
 
+init:
+	mkdir -p build/bin build/obj
+
 test:
 	@echo Source Files: $(SRC_FILES)
 	@echo Object Files: $(OBJ_FILES)
